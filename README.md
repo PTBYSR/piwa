@@ -15,6 +15,31 @@ PIWA lets you interact with an autonomous AI coding agent directly via WhatsApp.
 
 Adapt your agent to your commute, not the other way around. No heavy laptop required, no API tokens spent on quick brainstorming.
 
+## 📋 Requirements
+
+Before you begin, ensure your system meets the following criteria:
+
+*   **Operating System:** Windows, macOS, or Linux.
+*   **Runtime:** Node.js (v18.0.0 or higher).
+*   **Hardware (Recommended):**
+    *   **RAM:** 8GB minimum (16GB recommended for larger models).
+    *   **CPU:** 4+ cores (Modern Intel i5/i7 or Apple M-series suggested).
+*   **WhatsApp Account:** A secondary phone number or an existing account you wish to "link" as the agent.
+*   **Ollama:** PIWA can auto-install this for you on Windows, but having it pre-installed is recommended.
+
+## 🛠️ The Onboarding Process
+
+When you run `npm start` for the first time, PIWA will guide you through a **Smart Setup**:
+
+1.  **Ollama Check:** Recommends or auto-installs Ollama if missing.
+2.  **Resource Analysis:** Scans your available RAM and CPU cores.
+3.  **Model Selection:** Presents a curated list of coding models (like `qwen2.5-coder`) optimized for your specific hardware.
+4.  **WhatsApp Linking:** Generates a **Pairing Code** in your terminal.
+    *   Open WhatsApp on your phone.
+    *   Go to **Linked Devices** > **Link a Device**.
+    *   Select **Link with phone number instead**.
+    *   Enter the 8-character code displayed in your terminal.
+
 ## Quick Start
 
 ```bash

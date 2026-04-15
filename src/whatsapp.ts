@@ -86,8 +86,8 @@ export async function startWhatsApp(): Promise<void> {
                 if (!isSocketAlive) return; 
                 
                 try {
-                    const rawPhoneNumber = process.env.PHONE_NUMBER;
-                    if (!rawPhoneNumber) throw new Error("Missing PHONE_NUMBER env var.");
+                    const rawPhoneNumber = process.env.AGENT_NUMBER;
+                    if (!rawPhoneNumber) throw new Error("Missing AGENT_NUMBER env var.");
                     const phoneNumber = rawPhoneNumber.replace(/[^0-9]/g, '');
                     
                     const code = await sock.requestPairingCode(phoneNumber);

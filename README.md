@@ -1,118 +1,56 @@
-# 🤖 PIWA — Pi WhatsApp Agent
+<h1 align="center">PIWA</h1>
 
-> ⚠️ **Note: This project is currently in early Alpha / Work-In-Progress.** 
-> The core WhatsApp bridge and framework integration work, but there is currently a [known bug with how local models output their responses](https://github.com/PTBYSR/piwa-local/issues/1). Active development is ongoing, and PRs are highly welcome!
+<p align="center">
+  <b>Pi WhatsApp Agent</b><br>
+  A minimalistic WhatsApp bridge for the <a href="https://github.com/badlogic/pi-mono">pi coding agent</a>.
+</p>
 
-**PIWA** is a local-first, open-source AI coding agent bridged directly to your WhatsApp. It allows you to control your computer, perform web searches, and execute complex coding tasks via a secure WhatsApp conversation, all running entirely on your own hardware using **Ollama**.
-
----
-
-## 📋 Requirements
-
-Before you begin, ensure your system meets the following criteria:
-
-*   **Operating System:** Windows, macOS, or Linux.
-*   **Runtime:** Node.js (v18.0.0 or higher).
-*   **Hardware (Recommended):**
-    *   **RAM:** 8GB minimum (16GB recommended for larger models).
-    *   **CPU:** 4+ cores (Modern Intel i5/i7 or Apple M-series suggested).
-*   **WhatsApp Account:** A secondary phone number or an existing account you wish to "link" as the agent.
-*   **Ollama:** PIWA can auto-install this for you on Windows, but having it pre-installed is recommended.
+> ⚠️ **Alpha / Work-In-Progress:** The core bridge works, but there is currently a [known bug with how local models output their responses](https://github.com/PTBYSR/piwa-local/issues/1). PRs welcome!
 
 ---
 
-## ✨ Features
+PIWA lets you interact with an autonomous AI coding agent directly via WhatsApp. It runs entirely locally on your own hardware using Ollama, acting as a lightweight layer on top of the Pi agent framework. 
 
-*   **100% Local AI:** Your data and conversations stay on your machine. No OpenAI/Anthropic API keys required.
-*   **Autonomous Coding Agent:** Can read/write files, run terminal commands, and debug code directly in your workspace.
-*   **WhatsApp Integration:** Secure, end-to-end encrypted messaging bridge using the [Baileys](https://github.com/WhiskeySockets/Baileys) library.
-*   **Keyless Web Search:** Integrated DuckDuckGo tool for real-time information retrieval without API tokens.
-*   **Smart Onboarding:** Interactive CLI setup that detects your system specs and recommends the best model for your RAM.
-*   **Security First:** Strictly whitelisted. Only responds to the authorized number you specify.
+Adapt your agent to your commute, not the other way around. No heavy laptop required, no API tokens spent on quick brainstorming.
 
----
+## Quick Start
 
-## 🚀 Quick Start & Onboarding
-
-### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/pi-whatsapp-agent.git
-cd pi-whatsapp-agent
+git clone https://github.com/PTBYSR/piwa-local.git
+cd piwa-local
 npm install
+npm run build
 ```
 
-### 2. Configure Environment
-Create a `.env` file in the root directory:
-```env
-# Path where the agent is allowed to work/edit files
-WORK_DIR=C:/path/to/your/work/folder
-
-# Your personal phone number (the ONLY person the agent will listen to)
-PHONE_NUMBER=234...
-
-# Dummy key (Ollama is local and doesn't need a real one)
-OLLAMA_API_KEY=piwa-local-dummy-key
+Set up your `.env` file (copy from `.env.example`):
+```text
+WORK_DIR=./work
+PHONE_NUMBER=your_whatsapp_number
+OWNER_NUMBER=your_owner_jid
 ```
 
-### 3. Run PIWA
+Start the bridge:
 ```bash
 npm start
 ```
 
-> [!IMPORTANT]
-> **First Run Note:** The first time you run the agent, it may take a few minutes to begin responding. This is because it needs to initiate the local Ollama server and load the AI model into your system's RAM/VRAM. Subsequent starts will be significantly faster.
+## How It Works
 
----
+PIWA uses `baileys` to listen to an authorized WhatsApp number. Any incoming messages are forwarded to a local Pi agent session.
 
-## 🛠️ The Onboarding Process
+- **Local-First:** Designed specifically for Ollama and lightweight local LLMs.
+- **Agentic Tools:** Inherits Pi framework capabilities (`read`, `write`, `bash`).
+- **Secure:** Hardcoded whitelist ensures only the owner can execute commands on the host machine.
 
-When you run `npm start` for the first time, PIWA will guide you through a **Smart Setup**:
+## Philosophy
 
-1.  **Ollama Check:** Recommends or auto-installs Ollama if missing.
-2.  **Resource Analysis:** Scans your available RAM and CPU cores.
-3.  **Model Selection:** Presents a curated list of coding models (like `qwen2.5-coder`) optimized for your specific hardware.
-4.  **WhatsApp Linking:** Generates a **Pairing Code** in your terminal.
-    *   Open WhatsApp on your phone.
-    *   Go to **Linked Devices** > **Link a Device**.
-    *   Select **Link with phone number instead**.
-    *   Enter the 8-character code displayed in your terminal.
+I built PIWA because opening a laptop on a packed train just to ask my agent for an architectural strategy is a massive pain. Throwing down cash for a Mac Mini just to run a portable server felt like overkill.
 
----
+PIWA is ridiculously lightweight. It does precisely one thing: ties a messaging app to a local code reasoning engine. No bloat, no unnecessary token fees.
 
-## 🎮 Usage & Commands
+## Acknowledgements
 
-Once connected, you can text your bot from your whitelisted phone number.
+PIWA is built entirely on top of [Mario Zechner's](https://github.com/badlogic) fantastic **Pi** agent framework.
 
-### Example Tasks:
-*   *"Create a responsive React landing page in a new folder called 'my-site'"*
-*   *"Search for the latest documentation on the Resend API and write a TypeScript mailer script"*
-*   *"Refactor the code in src/utils.ts to be more efficient"*
-
-### Built-in Agent Commands:
-*   **/new** — Resets the agent's memory for a fresh coding session.
-*   **/model `<name>`** — Instantly switches the local model being used (e.g., `/model llama3:8b`).
-
----
-
-## 🛡️ Security & Reliability
-
-*   **Whitelisting:** PIWA uses a hard-coded check to ensure it only processes messages from your specific JID.
-*   **Connection Resilience:** Features intelligent reconnection logic that handles internet outages (408 errors) without losing your session.
-*   **Session Management:** Auth keys are stored locally in the `/auth` folder. If they ever get corrupted, the folder can be safely cleared to re-pair.
-
----
-
-## 📜 Acknowledgements
-
-PIWA is built on top of the powerful **PI** agent framework developed by [Mario Zechner](https://github.com/badlogic). 
-
-Special thanks to the following core libraries:
-*   [**pi-mono**](https://github.com/badlogic/pi-mono) — The core monorepo for the PI ecosystem.
-*   [**pi-coding-agent**](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) — The autonomous coding logic and tools.
-*   [**pi-agent-core**](https://github.com/badlogic/pi-mono/tree/main/packages/agent-core) — The backbone session and runtime management.
-
----
-
-## 📄 License
-Distribute under the MIT License. See [LICENSE](LICENSE) for more information.
-# piwa-local
+## License
+MIT

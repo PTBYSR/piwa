@@ -1,7 +1,7 @@
 # 🤖 PIWA — Pi WhatsApp Agent
 
 > ⚠️ **Note: This project is currently in early Alpha / Work-In-Progress.** 
-> The core WhatsApp bridge and framework integration work, but there is currently a known bug with how local models output their responses. Active development is ongoing, and PRs are highly welcome!
+> The core WhatsApp bridge and framework integration work, but there is currently a [known bug with how local models output their responses](https://github.com/PTBYSR/piwa-local/issues/1). Active development is ongoing, and PRs are highly welcome!
 
 **PIWA** is a local-first, open-source AI coding agent bridged directly to your WhatsApp. It allows you to control your computer, perform web searches, and execute complex coding tasks via a secure WhatsApp conversation, all running entirely on your own hardware using **Ollama**.
 

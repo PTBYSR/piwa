@@ -1,4 +1,6 @@
-<h1 align="center">PIWA</h1>
+<p align="center">
+  <img src="header.png" alt="PIWA Header">
+</p>
 
 <p align="center">
   <b>Pi WhatsApp Agent</b><br>

@@ -16,6 +16,30 @@ export function dbg(...args: unknown[]) {
   fs.appendFileSync(LOG_FILE, line);
 }
 
+// ── Keep the process alive through Baileys' async leaks ────────────────────
+// Baileys' uploadPreKeysToServerIfRequired (and a few other internal queries)
+// fire waitForMessage() promises with a 60s timeout on every connection open.
+// When the socket dies mid-handshake (internet cut, 408 timedOut, 515 stream
+// reset), those promises are orphaned — nothing awaits them, but the timer
+// keeps ticking. Each orphan eventually rejects with Boom("Timed Out").
+//
+// Node 15+ default unhandled-rejection policy is `throw`, which kills us. The
+// symptom we saw: reconnect loop running fine for minutes, then the process
+// suddenly dies with "Error: Timed Out" from promiseTimeout after internet
+// came back. Sneakerheads' production baileys integration handles this the
+// same way: log and keep going. Baileys' own reconnect logic then recovers.
+process.on('unhandledRejection', (reason) => {
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  dbg(`[PROCESS] unhandledRejection swallowed: ${msg}`);
+  console.error(`[PROCESS] unhandledRejection swallowed: ${msg}`);
+});
+
+process.on('uncaughtException', (error) => {
+  const msg = error instanceof Error ? `${error.message}\n${error.stack}` : String(error);
+  dbg(`[PROCESS] uncaughtException swallowed: ${msg}`);
+  console.error(`[PROCESS] uncaughtException swallowed: ${msg}`);
+});
+
 // Ensure the dbg function works
 dbg("SYSTEM: Startup initialized");
 

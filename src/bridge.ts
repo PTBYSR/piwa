@@ -98,7 +98,7 @@ export function createBridge(runtime: AgentSessionRuntime) {
               break;
             }
             // @ts-ignore
-            const model = getModel("ollama", arg);
+            const model = getModel("ollama-native", arg);
             if (!model) {
               await sendMessage(jid, "⚠️ Model unavailable. Is Ollama running?");
             } else {

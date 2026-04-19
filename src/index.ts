@@ -1,36 +1,44 @@
 /**
- * PIWA — minimal Baileys bridge.
+ * PIWA — Pi WhatsApp Agent with native terminal TUI.
  *
- * Receives WhatsApp messages from OWNER_NUMBER and prints them to the
- * terminal. Connection handling, pairing-code onboarding, and self-cleaning
- * auth are ported from the sneakerheads Baileys integration.
+ * Starts two systems sharing one AgentSession:
+ *   1. The native pi InteractiveMode TUI (full terminal coding-agent view)
+ *   2. A WhatsApp bridge (Baileys) that mirrors messages in/out
+ *
+ * Messages from WhatsApp appear in the TUI as user messages.
+ * Agent responses are rendered in the TUI AND sent back via WhatsApp.
+ * You can also type directly in the TUI — WhatsApp is just a remote input.
  */
 
 import "dotenv/config";
 
-import makeWASocket, {
-  DisconnectReason,
-  fetchLatestBaileysVersion,
-  useMultiFileAuthState,
-  type WASocket,
-} from "@whiskeysockets/baileys";
-import pino from "pino";
 import * as fs from "fs";
 import * as path from "path";
+import { getModel } from "@mariozechner/pi-ai";
+import {
+  AuthStorage,
+  ModelRegistry,
+  SessionManager,
+  SettingsManager,
+  InteractiveMode,
+  createAgentSessionRuntime,
+  createAgentSessionFromServices,
+  createAgentSessionServices,
+  getAgentDir,
+  initTheme,
+  type AgentSessionRuntime,
+  type CreateAgentSessionRuntimeFactory,
+} from "@mariozechner/pi-coding-agent";
 
-import { ask } from "./agent.js";
+import { createWhatsAppBridge, type WhatsAppBridge } from "./whatsapp.js";
+import { handleWhatsAppMessage } from "./agent.js";
 
 // -----------------------------------------------------------------------------
 // Config
 // -----------------------------------------------------------------------------
 
 const WORK_DIR = process.env.WORK_DIR || process.cwd();
-const AUTH_DIR = path.join(WORK_DIR, "auth");
-const BAILEYS_LOG = path.join(WORK_DIR, "baileys.log");
-
-// The WhatsApp number the bot runs *as*. Used to request the pairing code.
 const AGENT_NUMBER = (process.env.AGENT_NUMBER || "").replace(/[^0-9]/g, "");
-// The only number whose messages we surface. Others are ignored.
 const OWNER_NUMBER = (process.env.OWNER_NUMBER || "").replace(/[^0-9]/g, "");
 
 if (!AGENT_NUMBER) {
@@ -43,231 +51,135 @@ if (!OWNER_NUMBER) {
 }
 
 fs.mkdirSync(WORK_DIR, { recursive: true });
-fs.mkdirSync(AUTH_DIR, { recursive: true });
-
-const logger = pino(
-  { level: "silent" },
-  pino.destination({ dest: BAILEYS_LOG, sync: false }),
-);
-
-// -----------------------------------------------------------------------------
-// Auth helpers
-// -----------------------------------------------------------------------------
-
-function clearAuth() {
-  if (fs.existsSync(AUTH_DIR)) {
-    try {
-      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
-    } catch {}
-  }
-}
-
-// -----------------------------------------------------------------------------
-// Connection
-// -----------------------------------------------------------------------------
-
-let globalSock: WASocket | null = null;
-
-async function start(): Promise<void> {
-  const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-
-  // Fetch latest WA Web version to prevent 405 disconnects.
-  let version: [number, number, number];
-  try {
-    const info = await fetchLatestBaileysVersion();
-    version = info.version;
-    console.log(`📦 Using WA Web version: ${version.join(".")}`);
-  } catch {
-    console.warn("⚠️  Could not fetch latest version, using fallback");
-    version = [2, 3000, 1015901307];
-  }
-
-  // Mac/Safari browser significantly reduces immediate 401 disconnects from
-  // WhatsApp's bot detection.
-  const browser: [string, string, string] = ["Mac OS", "Safari", "10.15.7"];
-
-  let pairingCodeRequested = false;
-
-  const sock = makeWASocket({
-    auth: state,
-    version,
-    printQRInTerminal: false,
-    logger,
-    browser,
-    connectTimeoutMs: 60000,
-    keepAliveIntervalMs: 10000,
-    emitOwnEvents: true,
-    retryRequestDelayMs: 250,
-    syncFullHistory: false,
-  });
-
-  globalSock = sock;
-
-  // ---- connection.update ----------------------------------------------------
-  sock.ev.on("connection.update", (update) => {
-    const { connection, lastDisconnect } = update;
-
-    // First-time pairing: request a code after the WS handshake settles.
-    if (
-      connection === "connecting" &&
-      !sock.authState.creds.registered &&
-      !pairingCodeRequested
-    ) {
-      pairingCodeRequested = true;
-      setTimeout(async () => {
-        try {
-          console.log(
-            `\n📞 Requesting pairing code for ${AGENT_NUMBER}... (please wait)`,
-          );
-          const code = await sock.requestPairingCode(AGENT_NUMBER);
-          console.log(`\n📢 YOUR PAIRING CODE: \x1b[32m${code}\x1b[0m`);
-          console.log(
-            "👉 WhatsApp → Linked Devices → Link a Device → Link with phone number instead",
-          );
-        } catch (err) {
-          console.error("Failed to request pairing code:", err);
-          pairingCodeRequested = false;
-        }
-      }, 3000);
-    }
-
-    if (connection === "open") {
-      const botJid = sock.user?.id ?? "";
-      const botNumber = botJid.split(":")[0];
-      console.log("\n✅ Connected to WhatsApp!");
-      console.log(`📱 Bot Number: +${botNumber}`);
-      console.log(`👤 Listening for messages from OWNER: +${OWNER_NUMBER}`);
-      console.log("🖨️  Messages will be printed to this terminal.\n");
-    }
-
-    if (connection === "close") {
-      globalSock = null;
-      const err = lastDisconnect?.error as
-        | { output?: { statusCode?: number } }
-        | undefined;
-      const statusCode = err?.output?.statusCode;
-
-      console.log(`\n🔍 Connection closed: ${statusCode ?? "unknown"}`);
-
-      // Explicit logout (401): wipe auth and exit cleanly so the next start
-      // generates a new pairing code. Looping here causes server bans.
-      if (
-        statusCode === DisconnectReason.loggedOut ||
-        statusCode === 401
-      ) {
-        console.log(
-          "👋 Session invalid (Logged out / 401). Clearing auth so the next start re-pairs...",
-        );
-        clearAuth();
-        console.log(
-          "✅ Auth cleared. Run `npm start` again to generate a new pairing code.",
-        );
-        process.exit(0);
-      }
-
-      // Everything else (408, 428, 503, stream reset, etc.) is a transient
-      // network hiccup — reconnect immediately using existing auth. Do NOT
-      // wipe auth here; doing so during the 428 precondition window causes
-      // infinite pairing loops.
-      console.log("♻️  Reconnecting using existing auth...");
-      start().catch((e) => console.error("[Connection] restart failed:", e));
-    }
-  });
-
-  // ---- creds.update ---------------------------------------------------------
-  sock.ev.on("creds.update", async () => {
-    try {
-      await saveCreds();
-    } catch (e: any) {
-      if (e?.code !== "ENOENT") {
-        console.error("[Auth] saveCreds failed:", e?.message || e);
-      }
-    }
-  });
-
-  // ---- offline history replay ----------------------------------------------
-  // When the phone pushes a historical batch, re-emit each as an upsert so
-  // messages received while we were offline still flow through the normal
-  // handler.
-  sock.ev.on("messaging-history.set" as any, (payload: any) => {
-    const msgs: any[] = payload?.messages ?? [];
-    if (!msgs.length) return;
-    console.log(`[History] Replaying ${msgs.length} offline message(s)...`);
-    for (const msg of msgs) {
-      sock.ev.emit("messages.upsert", {
-        messages: [msg],
-        type: "append",
-      } as any);
-    }
-  });
-
-  // ---- inbound messages -----------------------------------------------------
-  sock.ev.on("messages.upsert", async ({ messages }) => {
-    for (const msg of messages) {
-      if (!msg?.message) continue;
-      if (msg.key?.fromMe) continue;
-
-      const jid = msg.key?.remoteJid ?? "";
-      // Owner gate: strip everything after @ and match against OWNER_NUMBER.
-      const sender = jid.split("@")[0]?.replace(/\D/g, "");
-      if (sender !== OWNER_NUMBER) continue;
-
-      const text =
-        msg.message.conversation ??
-        msg.message.extendedTextMessage?.text ??
-        "";
-      if (!text.trim()) continue;
-
-      const pushName = msg.pushName || "owner";
-      const ts = new Date().toISOString();
-      console.log(`\n📨 [${ts}] ${pushName} (+${sender}):`);
-      console.log(`   ${text}`);
-
-      // Give the sender the blue double-tick receipt.
-      try {
-        if (msg.key) await sock.readMessages([msg.key]);
-      } catch {}
-
-      // Keep WhatsApp's "typing…" indicator visible for the whole run.
-      // Presence auto-expires after ~15s, so we re-send every 10s.
-      await sock.sendPresenceUpdate("composing", jid).catch(() => {});
-      const typingTimer = setInterval(() => {
-        sock.sendPresenceUpdate("composing", jid).catch(() => {});
-      }, 10_000);
-
-      const sendChunk = (chunk: string) =>
-        sock.sendMessage(jid, { text: chunk }).then(() => undefined);
-
-      try {
-        const final = await ask(text, sendChunk);
-        if (final) await sock.sendMessage(jid, { text: final });
-      } catch (err) {
-        console.error("[Agent] failed:", err);
-        await sock
-          .sendMessage(jid, { text: "⚠️ agent error, check server logs" })
-          .catch(() => {});
-      } finally {
-        clearInterval(typingTimer);
-        await sock.sendPresenceUpdate("paused", jid).catch(() => {});
-      }
-    }
-  });
-}
 
 // -----------------------------------------------------------------------------
 // Bootstrap
 // -----------------------------------------------------------------------------
 
-start().catch((err) => {
-  console.error("Failed to start:", err);
-  process.exit(1);
-});
+async function main() {
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+  const authStorage = AuthStorage.create();
 
-// Graceful shutdown — surface Ctrl+C so the terminal doesn't leave a zombie.
-process.on("SIGINT", () => {
-  console.log("\n👋 Shutting down...");
-  try {
-    globalSock?.end(undefined);
-  } catch {}
-  process.exit(0);
+  // ---- Create runtime factory (simplified from pi's main.ts) ----
+  const createRuntime: CreateAgentSessionRuntimeFactory = async ({
+    cwd: runtimeCwd,
+    agentDir: runtimeAgentDir,
+    sessionManager,
+    sessionStartEvent,
+  }) => {
+    const services = await createAgentSessionServices({
+      cwd: runtimeCwd,
+      agentDir: runtimeAgentDir,
+      authStorage,
+      resourceLoaderOptions: {
+        appendSystemPrompt: [
+          "You are PIWA, a WhatsApp AI coding agent. When the user says a generic greeting like 'hi', 'hello', or 'hey', SIMPLY greet them back and ask how you can help. DO NOT autonomously explore the filesystem or project inventory unless explicitly requested to do so. Keep your WhatsApp responses concise."
+        ]
+      }
+    });
+
+    const { settingsManager, modelRegistry, resourceLoader } = services;
+
+    // Resolve model
+    const model = getModel("google", "gemini-2.5-flash");
+
+    const created = await createAgentSessionFromServices({
+      services,
+      sessionManager,
+      sessionStartEvent,
+      model,
+      thinkingLevel: "medium",
+    });
+
+    return {
+      ...created,
+      services,
+      diagnostics: [...services.diagnostics],
+    };
+  };
+
+  // ---- Create session manager ----
+  const sessionManager = SessionManager.create(cwd);
+
+  // ---- Build runtime ----
+  const runtime = await createAgentSessionRuntime(createRuntime, {
+    cwd,
+    agentDir,
+    sessionManager,
+  });
+
+  const { services } = runtime;
+  const { settingsManager } = services;
+
+  // ---- Initialize theme ----
+  initTheme(settingsManager.getTheme(), true);
+
+  // ---- Start the native pi TUI ----
+  const interactiveMode = new InteractiveMode(runtime, {
+    verbose: false,
+  });
+
+  // ---- Start WhatsApp bridge (non-blocking) ----
+  let waBridge: WhatsAppBridge | null = null;
+
+  // Processing lock — one WhatsApp message at a time
+  let waProcessing: Promise<unknown> = Promise.resolve();
+
+  createWhatsAppBridge({
+    workDir: WORK_DIR,
+    agentNumber: AGENT_NUMBER,
+    ownerNumber: OWNER_NUMBER,
+    onMessage: (text, jid, pushName, bridge) => {
+      // Serialize WhatsApp message handling
+      waProcessing = waProcessing.then(async () => {
+        bridge.startTyping(jid);
+
+        const sendChunk = async (chunk: string) => {
+          await bridge.sendMessage(jid, chunk);
+        };
+
+        try {
+          const reply = await handleWhatsAppMessage(
+            runtime.session,
+            text,
+            sendChunk,
+          );
+          if (reply) {
+            await bridge.sendMessage(jid, reply);
+          }
+        } catch (err) {
+          // Send simple error to WhatsApp
+          await bridge
+            .sendMessage(jid, "⚠️ agent error, check terminal")
+            .catch(() => {});
+        } finally {
+          bridge.stopTyping(jid);
+        }
+      }).catch(err => {
+        // Prevent the waProcessing queue from permanently failing if an unexpected error occurs
+      });
+    },
+  })
+    .then((bridge) => {
+      waBridge = bridge;
+    })
+    .catch((err) => {
+      console.error("[PIWA] WhatsApp bridge failed to start:", err);
+      console.error("[PIWA] Terminal TUI is still running without WhatsApp.");
+    });
+
+  // ---- Graceful shutdown ----
+  process.on("SIGINT", () => {
+    waBridge?.close();
+    // InteractiveMode handles its own SIGINT cleanup
+  });
+
+  // ---- Run the TUI (blocks until exit) ----
+  await interactiveMode.run();
+}
+
+main().catch((err) => {
+  console.error("Failed to start PIWA:", err);
+  process.exit(1);
 });

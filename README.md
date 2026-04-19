@@ -4,60 +4,40 @@
 
 <p align="center">
   <b>Pi WhatsApp Agent</b><br>
-  A minimalistic WhatsApp bridge for the <a href="https://github.com/badlogic/pi-mono">pi coding agent</a>.
+  A WhatsApp bridge for the <a href="https://github.com/badlogic/pi-mono">pi coding agent</a>.
 </p>
-
-> ⚠️ **Alpha / Work-In-Progress:** The core bridge works, but there is currently a [known bug with how local models output their responses](https://github.com/PTBYSR/piwa-local/issues/1). PRs welcome!
 
 ---
 
-PIWA lets you interact with an autonomous AI coding agent directly via WhatsApp. It runs entirely locally on your own hardware using Ollama, acting as a lightweight layer on top of the Pi agent framework. 
+PIWA lets you interact with an autonomous AI coding agent directly via WhatsApp. It acts as a lightweight messaging layer on top of the Pi agent framework. 
 
-Adapt your agent to your commute, not the other way around. No heavy laptop required, no API tokens spent on quick brainstorming.
+Adapt your agent to your commute. No laptop required—just text your agent architectural questions, ask it to read logs, or have it write code on your host machine while you are away from your desk.
 
 ## 📋 Requirements
 
-Before you begin, ensure your system meets the following criteria:
+* **Runtime:** Node.js (v18.0.0 or higher).
+* **WhatsApp Accounts:** 
+  * A secondary phone number to act as the "Agent".
+  * Your personal phone number to act as the "Owner".
+* **API Key:** A Google Gemini API key (defaults to `gemini-2.5-flash`).
 
-*   **Operating System:** Windows, macOS, or Linux.
-*   **Runtime:** Node.js (v18.0.0 or higher).
-*   **Hardware (Recommended):**
-    *   **RAM:** 8GB minimum (16GB recommended for larger models).
-    *   **CPU:** 4+ cores (Modern Intel i5/i7 or Apple M-series suggested).
-*   **WhatsApp Account:** A secondary phone number or an existing account you wish to "link" as the agent.
-*   **Ollama:** PIWA can auto-install this for you on Windows, but having it pre-installed is recommended.
-
-## 🛠️ The Onboarding Process
-
-When you run `npm start` for the first time, PIWA will guide you through a **Smart Setup**:
-
-1.  **Ollama Check:** Recommends or auto-installs Ollama if missing.
-2.  **Resource Analysis:** Scans your available RAM and CPU cores.
-3.  **Model Selection:** Presents a curated list of coding models (like `qwen2.5-coder`) optimized for your specific hardware.
-4.  **WhatsApp Linking:** Generates a **Pairing Code** in your terminal.
-    *   Open WhatsApp on your phone.
-    *   Go to **Linked Devices** > **Link a Device**.
-    *   Select **Link with phone number instead**.
-    *   Enter the 8-character code displayed in your terminal.
-
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/PTBYSR/piwa-local.git
 cd piwa-local
 npm install
-npm run build
 ```
 
-Set up your `.env` file (copy from `.env.example`):
+Create and configure your `.env` file:
 ```text
 WORK_DIR=./work
-# AGENT_NUMBER: The number the AI Agent will use to respond to you.
-# Format: Country code + number, NO plus sign (e.g., 1234567890)
-AGENT_NUMBER=agent_whatsapp_number
-# OWNER_NUMBER: Your personal WhatsApp number. Only this number can command the agent.
-# Format: Country code + number, NO plus sign.
-OWNER_NUMBER=your_personal_number
+# AGENT_NUMBER: The bot's number (Country code + number, NO plus sign)
+AGENT_NUMBER=1234567890   
+# OWNER_NUMBER: YOUR number (Only this number can command the agent)
+OWNER_NUMBER=0987654321   
+# GEMINI API KEY: Your Google AI Studio key
+GEMINI_API_KEY=your_google_gemini_api_key
 ```
 
 Start the bridge:
@@ -65,23 +45,29 @@ Start the bridge:
 npm start
 ```
 
-## How It Works
+## 🛠️ WhatsApp Linking
 
-PIWA uses `baileys` to listen to an authorized WhatsApp number. Any incoming messages are forwarded to a local Pi agent session.
+PIWA uses a seamless pairing code (no QR code scanning required):
 
-- **Local-First:** Designed specifically for Ollama and lightweight local LLMs.
-- **Agentic Tools:** Inherits Pi framework capabilities (`read`, `write`, `bash`).
-- **Secure:** Hardcoded whitelist ensures only the owner can execute commands on the host machine.
+1. Run `npm start`.
+2. Wait a few seconds for an **8-character Pairing Code** to appear in your terminal.
+3. Open WhatsApp on your **Agent phone**.
+4. Go to **Settings > Linked Devices > Link a Device**.
+5. Select **Link with phone number instead**.
+6. Enter the code from your terminal.
 
-## Philosophy
+Once linked, the `work/auth/` folder will securely store your session keys so you don't have to re-pair on restarts.
 
-I built PIWA because opening a laptop on a packed train just to ask my agent for an architectural strategy is a massive pain. Throwing down cash for a Mac Mini just to run a portable server felt like overkill.
+## ⚙️ How It Works
 
-PIWA is ridiculously lightweight. It does precisely one thing: ties a messaging app to a local code reasoning engine. No bloat, no unnecessary token fees.
+* **Dual Interface:** When you run `npm start`, the native `pi` Terminal UI (TUI) opens on your machine. You can watch the agent "think", run `bash` commands, and edit files in real-time on your computer screen while it simultaneously chats with you on WhatsApp.
+* **Agentic Tools:** Inherits the Pi framework's powerful capabilities (`read`, `write`, `bash`, `edit`, `ls`, `grep`, `find`).
+* **Secure:** A hardcoded whitelist ensures that **only** the `OWNER_NUMBER` can execute commands on the host machine. All other messages (group chats, spam, etc.) are silently dropped.
+* **WhatsApp Commands:** Text `/help` to the bot to see available commands like `/compact` (to summarize old context and save tokens) or `/tokens` (to see usage stats).
 
 ## Acknowledgements
 
-PIWA is built entirely on top of [Mario Zechner's](https://github.com/badlogic) fantastic **Pi** agent framework.
+PIWA is built entirely on top of [Mario Zechner's](https://github.com/badlogic) fantastic **Pi** agent framework. Uses `@whiskeysockets/baileys` for the WhatsApp Web protocol.
 
 ## License
 MIT

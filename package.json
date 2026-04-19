@@ -10,6 +10,7 @@
     "@mariozechner/pi-coding-agent": "^0.67.68",
     "@whiskeysockets/baileys": "^6.7.9",
     "dotenv": "latest",
+    "node-cache": "^5.1.2",
     "pino": "^10.3.1"
   },
   "devDependencies": {

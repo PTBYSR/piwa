@@ -8,6 +8,11 @@ import ConnectionPage from './pages/ConnectionPage'
 import SettingsPage from './pages/SettingsPage'
 import appIcon from './assets/icon.png'
 
+export interface ActivityMessage { id: string; direction: "in" | "out"; text: string; time: string; [key: string]: any; }
+export interface SessionStats { totalMessages: number; tokens: { total: number; input: number; output: number; }; [key: string]: any; }
+export interface ModelInfo { provider: string; id: string; name: string; [key: string]: any; }
+export interface ProviderInfo { id: string; name: string; hasAuth: boolean; isOAuth: boolean; [key: string]: any; }
+
 // --- The Discord-Style Splash Screen ---
 function SplashScreen() {
   const [dots, setDots] = useState('')

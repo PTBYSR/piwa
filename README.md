@@ -1,10 +1,15 @@
-<p align="center">
-  <img src="header.png" alt="PIWA Header">
-</p>
+<div align="center">
+  <img src="piwa-hero.png" alt="PIWA Hero" width="400" />
+</div>
+
+<h3 align="center">Get up and running with large language models, safely and easily.</h3>
 
 <p align="center">
-  <b>Pi WhatsApp Agent</b><br>
-  A WhatsApp bridge for the <a href="https://github.com/badlogic/pi-mono">pi coding agent</a>.
+  <b><a href="#">Download for macOS</a></b>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <b><a href="#">Download for Windows</a></b>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <b><a href="#">Download for Linux</a></b>
 </p>
 
 ---
@@ -12,6 +17,18 @@
 PIWA lets you interact with an autonomous AI coding agent directly via WhatsApp. It acts as a lightweight messaging layer on top of the <a href="https://github.com/badlogic/pi-mono">pi coding agent</a>. 
 
 Text your Whatsapp coding agent architectural questions, ask it to read logs, or have it write code on your host machine while you are away from your desk.
+
+---
+
+## Why Oldy? (vs. Ollama)
+
+We love local models, but we wanted a tool that actually understands your hardware and your workflow:
+
+* 🛡️ **Hardware-Aware Safety:** Ollama doesn't warn you if downloading a massive model will crash your laptop—**Oldy does.** We analyze your system specs and proactively prevent you from running models that exceed your hardware limits.
+* 🌍 **Instant Public URLs:** Ollama restricts you to local network access. **Oldy** automatically generates a secure, public URL for your models out-of-the-box, making it effortless to connect external web apps or share endpoints.
+* 📊 **Real-Time Telemetry:** Ollama leaves you guessing about system strain. **Oldy** provides built-in performance monitoring, helping you visualize exactly how a model is performing on your CPU, GPU, and RAM in real-time.
+
+---
 
 ## 📋 Requirements
 
@@ -21,24 +38,34 @@ Text your Whatsapp coding agent architectural questions, ask it to read logs, or
   * Your personal phone number to act as the "Owner".
 * **(OPTIONAL) API Key:** A Google Gemini, Anthropic, or OpenAI API key.
 
-## 🚀 Quick Start
+## Desktop App (Development)
 
-PIWA is designed for **Zero-Friction Setup**. You do not need to configure any `.env` files.
+Get started quickly with the Oldy Desktop Application.
 
 ```bash
-git clone https://github.com/PTBYSR/piwa-local.git
-cd piwa-local
+git clone https://github.com/PTBYSR/piwa.git
+cd piwa/piwa-desktop
+npm install
+npm run dev
+```
+
+## CLI & WhatsApp Agent Setup
+
+For developers who prefer the terminal or want to use the PIWA (Pi WhatsApp Agent) bridge to text their agent directly.
+
+```bash
+git clone https://github.com/PTBYSR/piwa.git
+cd piwa
 npm install
 npm start
 ```
 
-On your very first run, an interactive terminal wizard will guide you:
-1. It will ask for the Bot's WhatsApp number.
-2. It will ask for your personal WhatsApp number (so nobody else can command the bot).
-3. It will generate an **8-character Pairing Code** in your terminal.
-    * Open WhatsApp on your **Agent phone**.
-    * Go to **Settings > Linked Devices > Link a Device > Link with phone number instead**.
-    * Enter the code from your terminal.
+### Zero-Friction Pairing
+On your very first run of the CLI, an interactive terminal wizard will guide you:
+1. Enter your Bot's WhatsApp number.
+2. Enter your personal WhatsApp number (so nobody else can command the bot).
+3. Generate an **8-character Pairing Code**.
+4. On your Agent phone, go to **Settings > Linked Devices > Link with phone number instead** and enter the code.
 
 Once linked, your configuration is saved locally to `piwa.config.json` and `.piwa-auth/`, so you never have to pair again!
 

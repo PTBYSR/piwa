@@ -1,0 +1,10 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+
+.piwa-auth
+piwa.config.json
+piwa-baileys.log

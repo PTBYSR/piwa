@@ -1,0 +1,50 @@
+name: Build Piwa Apps
+
+on:
+  # This allows you to manually click a "Run workflow" button in the GitHub UI
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # This tells GitHub to boot up a Windows PC and a Mac PC in the cloud
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: cd piwa-desktop && npm install
+
+      - name: Build Windows App
+        if: matrix.os == 'windows-latest'
+        run: cd piwa-desktop && npm run build:win
+
+      - name: Build Mac App
+        if: matrix.os == 'macos-latest'
+        env:
+          # Tells electron-builder to skip looking for a paid Apple Developer certificate
+          CSC_IDENTITY_AUTO_DISCOVERY: false 
+        run: cd piwa-desktop && npm run build && npx electron-builder --mac -c.mac.identity=null
+
+      - name: Upload Windows Build
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Piwa-Windows
+          path: piwa-desktop/dist/*.exe
+
+      - name: Upload Mac Build
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Piwa-Mac
+          path: piwa-desktop/dist/*.dmg

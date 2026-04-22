@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #171717;
+  --bg-sidebar: #171717;
+  --bg-surface: #262626;
+  --bg-surface-hover: #2f2f2f;
+  --bg-input: #2f2f2f;
+  --border: #2f2f2f;
+  --border-light: #3a3a3a;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --accent: #ffffff;
+  --accent-hover: #d4d4d4;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --blue: #3b82f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Input styling */
+input, select, textarea {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Ensure all clickable elements explicitly show the pointer cursor */
+button, select, [role="button"], .cursor-pointer {
+  cursor: pointer !important;
+}
+
+button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
+/* Transition defaults */
+button, a, input, select {
+  transition: all 0.15s ease;
+}

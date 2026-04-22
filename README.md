@@ -10,7 +10,7 @@ Interact with your machine via a coding agent on WhatsApp.
 
 ### Windows
 
-[Download PIWA Setup for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa%20Setup%201.0.0.exe)
+[Download PIWA Setup for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa.Setup.1.0.0.exe)
 
 ### macOS & Linux
 

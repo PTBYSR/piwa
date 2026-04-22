@@ -1,3 +1,4 @@
+#!/usr/bin/env tsx
 /**
  * PIWA — Pi WhatsApp Agent with native terminal TUI.
  *
@@ -28,12 +29,60 @@ import {
 import { createWhatsAppBridge, type WhatsAppBridge } from "./whatsapp.js";
 import { handleWhatsAppMessage } from "./agent.js";
 import { loadOrPromptConfig, deleteConfig } from "./setup.js";
+import pc from "picocolors";
+
+// -----------------------------------------------------------------------------
+// CLI Subcommands
+// -----------------------------------------------------------------------------
+
+async function showStatus() {
+  const configPath = path.join(process.cwd(), "piwa.config.json");
+  const authDir = path.join(process.cwd(), ".piwa-auth");
+  
+  console.log(pc.bold("\n📊 PIWA Status"));
+  console.log("----------------");
+
+  if (fs.existsSync(configPath)) {
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    console.log(`${pc.green("✓")} Config: Found`);
+    console.log(`  - Bot Number: ${config.botNumber}`);
+    console.log(`  - Owner Number: ${config.ownerNumber}`);
+  } else {
+    console.log(`${pc.yellow("!")} Config: Not found (Run 'piwa' to set up)`);
+  }
+
+  if (fs.existsSync(authDir) && fs.readdirSync(authDir).length > 0) {
+    console.log(`${pc.green("✓")} Auth: WhatsApp session linked`);
+  } else {
+    console.log(`${pc.red("✗")} Auth: WhatsApp session not linked`);
+  }
+  
+  console.log("");
+}
 
 // -----------------------------------------------------------------------------
 // Bootstrap
 // -----------------------------------------------------------------------------
 
 async function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+
+  if (command === "status") {
+    await showStatus();
+    return;
+  }
+
+  if (command === "help") {
+    console.log(pc.bold("\n📖 PIWA CLI Help"));
+    console.log("----------------");
+    console.log(`${pc.cyan("piwa")}          Starts the agent bridge and TUI`);
+    console.log(`${pc.cyan("piwa status")}   Shows current pairing and config status`);
+    console.log(`${pc.cyan("piwa help")}     Shows this help message`);
+    console.log("");
+    return;
+  }
+
   const cwd = process.cwd();
   const agentDir = getAgentDir();
   const authStorage = AuthStorage.create();

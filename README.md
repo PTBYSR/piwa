@@ -29,9 +29,16 @@ Text your Whatsapp coding agent architectural questions, ask it to read logs, or
   * Your personal phone number to act as the "Owner".
 * **(OPTIONAL) API Key:** A Google Gemini, Anthropic, or OpenAI API key.
 
-## Desktop App (Development)
+## 📥 Desktop App Setup
 
-Get started quickly with the PIWA Desktop Application.
+The easiest way to use PIWA on Windows is to use the standalone desktop installer.
+
+**[Download PIWA Desktop for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa%20Setup%201.0.0.exe)**
+
+*(macOS and Linux builds coming soon)*
+
+### Desktop App (Development)
+If you want to run the desktop app from source:
 
 ```bash
 git clone https://github.com/PTBYSR/piwa.git

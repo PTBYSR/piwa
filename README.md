@@ -7,7 +7,7 @@
 <p align="center">
   <b><a href="#">Download for macOS</a></b>
   &nbsp;&nbsp;|&nbsp;&nbsp;
-  <b><a href="#">Download for Windows</a></b>
+  <b><a href="https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa%20Setup%201.0.0.exe">Download for Windows</a></b>
   &nbsp;&nbsp;|&nbsp;&nbsp;
   <b><a href="#">Download for Linux</a></b>
 </p>

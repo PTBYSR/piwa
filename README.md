@@ -20,16 +20,6 @@ Text your Whatsapp coding agent architectural questions, ask it to read logs, or
 
 ---
 
-## Why Oldy? (vs. Ollama)
-
-We love local models, but we wanted a tool that actually understands your hardware and your workflow:
-
-* 🛡️ **Hardware-Aware Safety:** Ollama doesn't warn you if downloading a massive model will crash your laptop—**Oldy does.** We analyze your system specs and proactively prevent you from running models that exceed your hardware limits.
-* 🌍 **Instant Public URLs:** Ollama restricts you to local network access. **Oldy** automatically generates a secure, public URL for your models out-of-the-box, making it effortless to connect external web apps or share endpoints.
-* 📊 **Real-Time Telemetry:** Ollama leaves you guessing about system strain. **Oldy** provides built-in performance monitoring, helping you visualize exactly how a model is performing on your CPU, GPU, and RAM in real-time.
-
----
-
 ## 📋 Requirements
 
 * **Runtime:** Node.js (v18.0.0 or higher).
@@ -40,7 +30,7 @@ We love local models, but we wanted a tool that actually understands your hardwa
 
 ## Desktop App (Development)
 
-Get started quickly with the Oldy Desktop Application.
+Get started quickly with the PIWA Desktop Application.
 
 ```bash
 git clone https://github.com/PTBYSR/piwa.git

@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="piwa-hero.png" alt="PIWA" width="200"/>
+  <img src="piwa-hero.png" alt="Piwa" width="200"/>
 </p>
 
-# PIWA
+# Piwa
 
 Interact with your machine via a coding agent on WhatsApp.
 
@@ -10,7 +10,7 @@ Interact with your machine via a coding agent on WhatsApp.
 
 ### Windows
 
-[Download PIWA Setup for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa.Setup.1.0.0.exe)
+[Download Piwa Setup for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa.Setup.1.0.0.exe)
 
 ### macOS & Linux
 
@@ -63,7 +63,7 @@ npm start
 
 ## Authentication
 
-PIWA uses the native `pi-coding-agent` for authentication. It will automatically find existing keys in `~/.pi/agent/auth.json`. You can also use `/login` in the terminal to connect OAuth providers.
+Piwa uses the native `pi-coding-agent` for authentication. It will automatically find existing keys in `~/.pi/agent/auth.json`. You can also use `/login` in the terminal to connect OAuth providers.
 
 ## License
 

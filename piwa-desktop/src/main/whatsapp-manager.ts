@@ -45,7 +45,7 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
         authStorage,
         resourceLoaderOptions: {
           appendSystemPrompt: [
-            "You are PIWA, a WhatsApp AI coding agent. When the user says a generic greeting like 'hi', 'hello', or 'hey', SIMPLY greet them back and ask how you can help. DO NOT autonomously explore the filesystem or project inventory unless explicitly requested to do so. Keep your WhatsApp responses concise."
+            "You are Piwa, a WhatsApp AI coding agent. When the user says a generic greeting like 'hi', 'hello', or 'hey', SIMPLY greet them back and ask how you can help. DO NOT autonomously explore the filesystem or project inventory unless explicitly requested to do so. Keep your WhatsApp responses concise."
           ]
         }
       });
@@ -71,7 +71,7 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
 
       const thinkingLevel = settingsManager.getDefaultThinkingLevel() || "medium";
 
-      console.log(`[PIWA] Using model: ${model.provider}/${model.id}`);
+      console.log(`[Piwa] Using model: ${model.provider}/${model.id}`);
 
       const sessionObj = await createAgentSessionFromServices({
         services,
@@ -224,10 +224,10 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
       if (!model) return false;
       await activeSession.setModel(model);
       activeRuntime.services.settingsManager.setDefaultModelAndProvider(provider, modelId);
-      console.log(`[PIWA] Model changed to: ${provider}/${modelId}`);
+      console.log(`[Piwa] Model changed to: ${provider}/${modelId}`);
       return true;
     } catch (err) {
-      console.error('[PIWA] Failed to set model:', err);
+      console.error('[Piwa] Failed to set model:', err);
       return false;
     }
   });
@@ -242,7 +242,7 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
     try {
       activeSession.setThinkingLevel(level);
       activeRuntime.services.settingsManager.setDefaultThinkingLevel(level);
-      console.log(`[PIWA] Thinking level changed to: ${level}`);
+      console.log(`[Piwa] Thinking level changed to: ${level}`);
       return true;
     } catch {
       return false;
@@ -285,12 +285,12 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
           return '';
         },
         onProgress: (message: string) => {
-          console.log(`[PIWA] OAuth: ${message}`);
+          console.log(`[Piwa] OAuth: ${message}`);
         },
       });
       return true;
     } catch (err) {
-      console.error('[PIWA] Login failed:', err);
+      console.error('[Piwa] Login failed:', err);
       return false;
     }
   });
@@ -340,7 +340,7 @@ export function initWhatsAppManager(mainWindow: BrowserWindow) {
       const result = await activeSession.compact();
       return { tokensBefore: result.tokensBefore };
     } catch (err: any) {
-      console.error('[PIWA] Compaction failed:', err);
+      console.error('[Piwa] Compaction failed:', err);
       return null;
     }
   });

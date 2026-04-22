@@ -29,7 +29,7 @@ export async function loadOrPromptConfig(): Promise<PiwaConfig> {
   }
 
   console.clear();
-  intro(color.bgCyan(color.black(" PIWA (Pi WhatsApp Agent) Setup ")));
+  intro(color.bgCyan(color.black(" Piwa (Pi WhatsApp Agent) Setup ")));
 
   const agentNumber = await text({
     message: "What is the BOT's WhatsApp number?",

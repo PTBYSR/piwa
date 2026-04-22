@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * PIWA — Pi WhatsApp Agent with native terminal TUI.
+ * Piwa — Pi WhatsApp Agent with native terminal TUI.
  *
  * Starts two systems sharing one AgentSession:
  *   1. The native pi InteractiveMode TUI (full terminal coding-agent view)
@@ -39,7 +39,7 @@ async function showStatus() {
   const configPath = path.join(process.cwd(), "piwa.config.json");
   const authDir = path.join(process.cwd(), ".piwa-auth");
   
-  console.log(pc.bold("\n📊 PIWA Status"));
+  console.log(pc.bold("\n📊 Piwa Status"));
   console.log("----------------");
 
   if (fs.existsSync(configPath)) {
@@ -74,7 +74,7 @@ async function main() {
   }
 
   if (command === "help") {
-    console.log(pc.bold("\n📖 PIWA CLI Help"));
+    console.log(pc.bold("\n📖 Piwa CLI Help"));
     console.log("----------------");
     console.log(`${pc.cyan("piwa")}          Starts the agent bridge and TUI`);
     console.log(`${pc.cyan("piwa status")}   Shows current pairing and config status`);
@@ -100,7 +100,7 @@ async function main() {
       authStorage,
       resourceLoaderOptions: {
         appendSystemPrompt: [
-          "You are PIWA, a WhatsApp AI coding agent. When the user says a generic greeting like 'hi', 'hello', or 'hey', SIMPLY greet them back and ask how you can help. DO NOT autonomously explore the filesystem or project inventory unless explicitly requested to do so. Keep your WhatsApp responses concise."
+          "You are Piwa, a WhatsApp AI coding agent. When the user says a generic greeting like 'hi', 'hello', or 'hey', SIMPLY greet them back and ask how you can help. DO NOT autonomously explore the filesystem or project inventory unless explicitly requested to do so. Keep your WhatsApp responses concise."
         ]
       }
     });
@@ -239,7 +239,7 @@ async function main() {
 
   // ---- Graceful shutdown ----
   process.on("SIGINT", () => {
-    console.log("\n\n🛑 Setup cancelled by user. Exiting PIWA...");
+    console.log("\n\n🛑 Setup cancelled by user. Exiting Piwa...");
     waBridge?.close();
     process.exit(0);
   });
@@ -250,6 +250,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("Failed to start PIWA:", err);
+  console.error("Failed to start Piwa:", err);
   process.exit(1);
 });

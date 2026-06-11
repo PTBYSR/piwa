@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="piwa-hero.png" alt="Piwa" width="200"/>
+  <img src="piwa-hero.png" alt="Piwa" width="100"/>
 </p>
 
 # Piwa
@@ -9,10 +9,6 @@ Interact with your machine via a coding agent on WhatsApp.
 ## Download
 
 ### Windows
-
-[Download Piwa Setup for Windows](https://github.com/PTBYSR/piwa/releases/download/v1.0.0/Piwa.Setup.1.0.0.exe)
-
-> **Note:** If Windows SmartScreen shows a "Windows protected your PC" warning, click **More info** and then **Run anyway**. This appears because the app is currently unsigned.
 
 ### macOS & Linux
 

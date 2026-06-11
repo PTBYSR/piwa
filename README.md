@@ -6,14 +6,6 @@
 
 Interact with your machine via a coding agent on WhatsApp.
 
-## Download
-
-### Windows
-
-### macOS & Linux
-
-Coming soon.
-
 ---
 
 ## Get Started (3 Steps)
@@ -34,6 +26,8 @@ piwa
 ```
 
 On first run, a QR code will appear. Open **WhatsApp → Settings → Linked Devices → Link a Device**, scan the code, and you're live.
+
+> **Desktop app coming soon** — contributions are very welcome! See the [Development](#development) section to run locally.
 
 ---
 

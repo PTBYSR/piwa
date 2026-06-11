@@ -16,32 +16,50 @@ Coming soon.
 
 ---
 
-## Get started
+## Get Started (3 Steps)
 
-### Running the Terminal CLI (User Guide)
+1. **Install it**
+```bash
+npm install -g pi-whatsapp-agent
+```
 
-#### 1. Prerequisites
-Make sure you have the following before starting:
-- **Node.js** v18.0.0 or higher installed on your machine.
+2. **Log in**
+```bash
+piwa login
+```
+
+3. **Run it**
+```bash
+piwa
+```
+
+On first run, a QR code will appear. Open **WhatsApp → Settings → Linked Devices → Link a Device**, scan the code, and you're live.
+
+---
+
+## Detailed Usage
+
+### Prerequisites
+- **Node.js** v18.0.0 or higher.
 - A **WhatsApp account** with a secondary phone number for the agent.
 - **API keys** for at least one supported LLM provider (Google Gemini, Anthropic, or OpenAI).
 
-#### 2. Install Piwa
-If you have cloned the repository locally, install the dependencies:
+### Installation
+If you cloned the repository locally:
 
 ```bash
 cd piwa
 npm install
 ```
 
-Alternatively, if you installed Piwa globally:
+Or install globally:
 
 ```bash
 npm install -g pi-whatsapp-agent
 ```
 
-#### 3. Authenticate
-Piwa will look for existing API keys in `~/.pi/agent/auth.json`. If you haven't authenticated yet, run the following in your terminal:
+### Authenticate
+Piwa looks for API keys in `~/.pi/agent/auth.json`. If you haven't authenticated yet, run:
 
 ```bash
 piwa login
@@ -49,29 +67,29 @@ piwa login
 
 Or manually add your API keys to `~/.pi/agent/auth.json`.
 
-#### 4. Start the Agent
-To launch the WhatsApp bridge and terminal UI:
+### First Run & Pairing
+Launch the WhatsApp bridge and terminal UI:
 
 ```bash
 piwa
 ```
 
-On your **first run**, you will be guided through a zero-friction pairing process:
-- A QR code will appear in your terminal.
+You'll be guided through a zero-friction pairing process:
+- A QR code appears in your terminal.
 - Open WhatsApp on your phone → Settings → Linked Devices → Link a Device.
 - Scan the QR code to connect your agent number.
 
-Once paired, the agent bridge will stay active and you can start sending commands via WhatsApp.
+Once paired, the bridge stays active and you can send commands via WhatsApp.
 
-#### 5. Common CLI Commands
-| Command | Description |
-|---------|-------------|
-| `piwa` | Starts the agent bridge and TUI |
-| `piwa status` | Shows current pairing and configuration status |
-| `piwa help` | Displays the help menu with all available commands |
-| `piwa logout` | Removes saved authentication |
+### Common CLI Commands
+| Command      | Description                                       |
+|--------------|---------------------------------------------------|
+| `piwa`       | Starts the agent bridge and TUI                 |
+| `piwa status`| Shows current pairing and configuration status    |
+| `piwa help`  | Displays the help menu                            |
+| `piwa logout`| Removes saved authentication                      |
 
-#### 6. Stopping the Agent
+### Stopping the Agent
 Press `Ctrl + C` in the terminal to gracefully shut down the bridge.
 
 ---

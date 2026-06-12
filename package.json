@@ -1,5 +1,5 @@
 {
-  "name": "@piwa/cli",
+  "name": "piwa-cli",
   "version": "1.0.0",
   "type": "module",
   "bin": {

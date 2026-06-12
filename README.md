@@ -12,7 +12,7 @@ Interact with your machine via a coding agent on WhatsApp.
 
 1. **Install it**
 ```bash
-npm install -g pi-whatsapp-agent
+npm install -g @piwa/cli
 ```
 
 2. **Log in**
@@ -49,7 +49,7 @@ npm install
 Or install globally:
 
 ```bash
-npm install -g pi-whatsapp-agent
+npm install -g @piwa/cli
 ```
 
 ### Authenticate

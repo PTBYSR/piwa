@@ -1,5 +1,5 @@
 {
-  "name": "pi-whatsapp-agent",
+  "name": "@piwa/cli",
   "version": "1.0.0",
   "type": "module",
   "bin": {

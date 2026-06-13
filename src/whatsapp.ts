@@ -330,7 +330,14 @@ export async function createWhatsAppBridge(
           if (msg.key?.fromMe) continue;
 
           const jid = msg.key?.remoteJid ?? "";
-          const sender = jid.split("@")[0]?.replace(/\D/g, "");
+          const sender = jid.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+          
+          appendToDebugLog("INBOUND", [
+            `JID: ${jid}`,
+            `Sender: ${sender}`,
+            `Owner: ${opts.ownerNumber}`,
+            `Match: ${sender === opts.ownerNumber}`
+          ]);
           
           if (sender !== opts.ownerNumber) {
             continue;

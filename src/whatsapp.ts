@@ -341,6 +341,8 @@ export async function createWhatsAppBridge(
 
           const jid = msg.key?.remoteJid ?? "";
           
+          appendToDebugLog("INBOUND_FULL_MSG", [JSON.stringify(msg, null, 2)]);
+          
           // Match by full JID (handles LID format like 279...@lid)
           // Also fall back to phone number extraction for regular JIDs
           const senderBase = jid.split(":")[0]; // strip device index

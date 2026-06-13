@@ -217,6 +217,13 @@ export async function createWhatsAppBridge(
               console.log(`✅ Owner verified! (JID: ${ownerJid})`);
               console.log("✅ Connected to WhatsApp!\n");
               
+              // Send a confirmation message to the owner
+              try {
+                await sock.sendMessage(ownerJid, {
+                  text: "✅ *Piwa is online!*\n\nYour coding agent is connected and ready. Send me a message or a command to get started.\n\nType */help* for available commands."
+                });
+              } catch {}
+              
               isResolved = true;
               
               const bridgeObject: WhatsAppBridge = {

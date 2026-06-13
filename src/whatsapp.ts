@@ -340,24 +340,20 @@ export async function createWhatsAppBridge(
           if (msg.key?.fromMe) continue;
 
           const jid = msg.key?.remoteJid ?? "";
+          const senderPn = (msg.key as any)?.senderPn ?? "";
           
           appendToDebugLog("INBOUND_FULL_MSG", [JSON.stringify(msg, null, 2)]);
           
-          // Match by full JID (handles LID format like 279...@lid)
-          // Also fall back to phone number extraction for regular JIDs
-          const senderBase = jid.split(":")[0]; // strip device index
+          // Match by senderPn (phone number) or fall back to remoteJid
+          const senderBase = (senderPn || jid).split(":")[0]; // strip device index
           const senderDigits = senderBase.split("@")[0]?.replace(/\D/g, "");
-          const ownerBase = ownerJid?.split(":")[0] ?? "";
           
-          const isOwner = 
-            senderBase === ownerBase ||                    // exact JID match (LID or phone)
-            senderDigits === opts.ownerNumber;             // phone number fallback
+          const isOwner = senderDigits === opts.ownerNumber;
           
           appendToDebugLog("INBOUND", [
             `JID: ${jid}`,
-            `SenderBase: ${senderBase}`,
-            `OwnerJid: ${ownerJid}`,
-            `OwnerBase: ${ownerBase}`,
+            `SenderPn: ${senderPn}`,
+            `SenderDigits: ${senderDigits}`,
             `OwnerNumber: ${opts.ownerNumber}`,
             `IsOwner: ${isOwner}`
           ]);

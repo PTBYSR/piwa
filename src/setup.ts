@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import { intro, text, outro, isCancel, cancel } from "@clack/prompts";
+import { intro, text, outro, select, log, isCancel, cancel } from "@clack/prompts";
 import color from "picocolors";
+import { spawn } from "child_process";
 
 const CONFIG_FILE = path.resolve(process.cwd(), "piwa.config.json");
 
@@ -13,6 +14,120 @@ export interface PiwaConfig {
 export function deleteConfig() {
   if (fs.existsSync(CONFIG_FILE)) {
     fs.unlinkSync(CONFIG_FILE);
+  }
+}
+
+export function hasAnyProvider(authStorage: any): boolean {
+  if (authStorage.list().length > 0) return true;
+
+  const commonEnvKeys = [
+    "GEMINI_API_KEY",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "DEEPSEEK_API_KEY",
+    "GROQ_API_KEY",
+    "MISTRAL_API_KEY",
+    "GOOGLE_APPLICATION_CREDENTIALS"
+  ];
+  for (const envKey of commonEnvKeys) {
+    if (process.env[envKey]) return true;
+  }
+
+  return false;
+}
+
+export async function ensureAIProvider(authStorage: any): Promise<void> {
+  if (hasAnyProvider(authStorage)) {
+    return;
+  }
+
+  log.warn("⚠️ No AI provider credentials detected!");
+
+  const choice = await select({
+    message: "How would you like to connect to an AI provider?",
+    options: [
+      {
+        value: "google-antigravity",
+        label: "Google Antigravity (Free - Gemini 3, Claude, GPT-OSS)",
+        hint: "Recommended. Free with Google account, no API keys needed."
+      },
+      {
+        value: "google-gemini-cli",
+        label: "Google Gemini CLI (Free - Gemini models)",
+        hint: "Free with Google account."
+      },
+      {
+        value: "api-key",
+        label: "Enter an API Key manually (Gemini, Anthropic, OpenAI, etc.)",
+      },
+      {
+        value: "skip",
+        label: "Skip / Already configured via other environment variables"
+      }
+    ]
+  });
+
+  if (isCancel(choice) || choice === "skip") {
+    return;
+  }
+
+  if (choice === "google-antigravity" || choice === "google-gemini-cli") {
+    log.info("⏳ Starting Google login flow...");
+
+    await authStorage.login(choice, {
+      onAuth: ({ url }: { url: string }) => {
+        log.info("🔗 Opening your browser to complete Google Sign-In...");
+        log.info(`If the browser doesn't open, visit:\n${url}`);
+
+        try {
+          if (process.platform === "win32") {
+            spawn("cmd", ["/c", "start", url.replace(/&/g, "^&")], { shell: true });
+          } else if (process.platform === "darwin") {
+            spawn("open", [url]);
+          } else {
+            spawn("xdg-open", [url]);
+          }
+        } catch {}
+      },
+      onProgress: (msg: string) => {
+        log.info(`⏳ ${msg}`);
+      },
+      onManualCodeInput: async () => {
+        const input = await text({
+          message: "Paste the redirect URL or authorization code from your browser (optional):",
+          placeholder: "https://localhost:..."
+        });
+        if (isCancel(input)) return "";
+        return input || "";
+      }
+    });
+
+    log.success("🎉 Successfully authenticated with Google!");
+  } else if (choice === "api-key") {
+    const provider = await select({
+      message: "Select your AI provider:",
+      options: [
+        { value: "google", label: "Google Gemini" },
+        { value: "anthropic", label: "Anthropic Claude" },
+        { value: "openai", label: "OpenAI" },
+        { value: "deepseek", label: "DeepSeek" },
+        { value: "groq", label: "Groq" }
+      ]
+    });
+
+    if (isCancel(provider)) return;
+
+    const key = await text({
+      message: `Enter your API key for ${provider}:`,
+      validate(value) {
+        if (!value.trim()) return "API key cannot be empty.";
+      }
+    });
+
+    if (isCancel(key)) return;
+
+    authStorage.set(provider, { type: "api_key", key: key.trim() });
+    log.success(`🎉 API key saved for ${provider}!`);
   }
 }
 

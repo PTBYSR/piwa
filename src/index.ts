@@ -28,7 +28,7 @@ import {
 
 import { createWhatsAppBridge, type WhatsAppBridge } from "./whatsapp.js";
 import { handleWhatsAppMessage } from "./agent.js";
-import { loadOrPromptConfig, deleteConfig } from "./setup.js";
+import { loadOrPromptConfig, deleteConfig, ensureAIProvider } from "./setup.js";
 import pc from "picocolors";
 
 // -----------------------------------------------------------------------------
@@ -86,6 +86,9 @@ async function main() {
   const cwd = process.cwd();
   const agentDir = getAgentDir();
   const authStorage = AuthStorage.create();
+
+  // Run onboarding check for AI credentials
+  await ensureAIProvider(authStorage);
 
   // ---- Create runtime factory (simplified from pi's main.ts) ----
   const createRuntime: CreateAgentSessionRuntimeFactory = async ({

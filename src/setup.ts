@@ -147,7 +147,7 @@ export async function loadOrPromptConfig(): Promise<PiwaConfig> {
   intro(color.bgCyan(color.black(" Piwa (Pi WhatsApp Agent) Setup ")));
 
   const agentNumber = await text({
-    message: "What is the BOT's WhatsApp number?",
+    message: "What is the BOT's WhatsApp number? (Must be an active, regular personal account; NOT a WhatsApp Business account)",
     placeholder: "e.g. 2347066499537",
     validate(value) {
       if (!value) return color.red("Please enter a valid number.");

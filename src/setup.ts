@@ -41,20 +41,21 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
     return;
   }
 
-  log.warn("⚠️ No AI provider credentials detected!");
+  console.log(color.yellow("\n⚠️  No AI provider credentials detected!"));
+  console.log("To run Piwa, you need to connect to an AI provider.\n");
 
   const choice = await select({
-    message: "How would you like to connect to an AI provider?",
+    message: "Select an option to authenticate:",
     options: [
       {
         value: "google-antigravity",
         label: "Google Antigravity (Free - Gemini 3, Claude, GPT-OSS)",
-        hint: "Recommended. Free with Google account, no API keys needed."
+        hint: "Login with a Google account"
       },
       {
         value: "google-gemini-cli",
         label: "Google Gemini CLI (Free - Gemini models)",
-        hint: "Free with Google account."
+        hint: "Login with a Google account"
       },
       {
         value: "api-key",
@@ -62,7 +63,7 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
       },
       {
         value: "skip",
-        label: "Skip / Already configured via other environment variables"
+        label: "Skip / Already configured via environment variables"
       }
     ]
   });
@@ -72,16 +73,15 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
   }
 
   if (choice === "google-antigravity" || choice === "google-gemini-cli") {
-    log.info("⏳ Starting Google login flow...");
+    console.log(color.cyan("\nStarting Google login flow..."));
 
     await authStorage.login(choice, {
       onAuth: ({ url }: { url: string }) => {
-        log.info("🔗 Opening your browser to complete Google Sign-In...");
-        log.info(`If the browser doesn't open, visit:\n${url}`);
+        console.log(`\n🔗 Visit this link to authenticate:\n${color.blue(url)}\n`);
 
         try {
           if (process.platform === "win32") {
-            spawn("cmd", ["/c", "start", url.replace(/&/g, "^&")], { shell: true });
+            spawn("cmd", ["/c", `start "" "${url}"`], { shell: true });
           } else if (process.platform === "darwin") {
             spawn("open", [url]);
           } else {
@@ -89,12 +89,12 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
           }
         } catch {}
       },
-      onProgress: (msg: string) => {
-        log.info(`⏳ ${msg}`);
+      onProgress: () => {
+        // Keep progress silent to match pi's clean aesthetic
       },
       onManualCodeInput: async () => {
         const input = await text({
-          message: "Paste the redirect URL or authorization code from your browser (optional):",
+          message: "Paste redirect URL or auth code if browser login failed:",
           placeholder: "https://localhost:..."
         });
         if (isCancel(input)) return "";
@@ -102,7 +102,7 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
       }
     });
 
-    log.success("🎉 Successfully authenticated with Google!");
+    console.log(color.green("\n✅ Google authentication successful!\n"));
   } else if (choice === "api-key") {
     const provider = await select({
       message: "Select your AI provider:",
@@ -127,7 +127,7 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
     if (isCancel(key)) return;
 
     authStorage.set(provider, { type: "api_key", key: key.trim() });
-    log.success(`🎉 API key saved for ${provider}!`);
+    console.log(color.green(`\n✅ API key saved for ${provider}!\n`));
   }
 }
 

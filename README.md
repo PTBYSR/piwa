@@ -8,24 +8,22 @@ Interact with your machine via a coding agent on WhatsApp.
 
 ---
 
-## Get Started (3 Steps)
+## Get Started (2 Steps)
 
 1. **Install it**
 ```bash
 npm install -g piwa-cli
 ```
 
-2. **Log in**
-```bash
-piwa login
-```
-
-3. **Run it**
+2. **Run it**
 ```bash
 piwa
 ```
 
-On first run, a QR code will appear. Open **WhatsApp → Settings → Linked Devices → Link a Device**, scan the code, and you're live.
+On first run, `piwa` will guide you through a quick setup:
+- **AI Credentials**: If no credentials are found, it will help you connect to a provider (like Google Antigravity, which is free).
+- **Phone Numbers**: Set your WhatsApp bot number and owner number.
+- **WhatsApp Link**: A QR code will appear. Open **WhatsApp → Settings → Linked Devices → Link a Device**, scan the code, and you're live!
 
 > **Desktop app coming soon** — contributions are very welcome! See the [Development](#development) section to run locally.
 

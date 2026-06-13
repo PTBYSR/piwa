@@ -114,6 +114,7 @@ export async function createWhatsAppBridge(
 
   let globalSock: WASocket | null = null;
   let typingTimers = new Map<string, ReturnType<typeof setInterval>>();
+  let ownerJid: string | null = null; // Resolved JID (could be LID or phone@s.whatsapp.net)
 
   return new Promise((resolveBridge, rejectBridge) => {
     let isResolved = false;
@@ -211,7 +212,9 @@ export async function createWhatsAppBridge(
                 return;
               }
               
-              console.log("✅ Owner verified!");
+              // Store the resolved JID (may be a LID like 279...@lid or phone@s.whatsapp.net)
+              ownerJid = ownerCheck.jid;
+              console.log(`✅ Owner verified! (JID: ${ownerJid})`);
               console.log("✅ Connected to WhatsApp!\n");
               
               isResolved = true;
@@ -330,16 +333,27 @@ export async function createWhatsAppBridge(
           if (msg.key?.fromMe) continue;
 
           const jid = msg.key?.remoteJid ?? "";
-          const sender = jid.split("@")[0]?.split(":")[0]?.replace(/\D/g, "");
+          
+          // Match by full JID (handles LID format like 279...@lid)
+          // Also fall back to phone number extraction for regular JIDs
+          const senderBase = jid.split(":")[0]; // strip device index
+          const senderDigits = senderBase.split("@")[0]?.replace(/\D/g, "");
+          const ownerBase = ownerJid?.split(":")[0] ?? "";
+          
+          const isOwner = 
+            senderBase === ownerBase ||                    // exact JID match (LID or phone)
+            senderDigits === opts.ownerNumber;             // phone number fallback
           
           appendToDebugLog("INBOUND", [
             `JID: ${jid}`,
-            `Sender: ${sender}`,
-            `Owner: ${opts.ownerNumber}`,
-            `Match: ${sender === opts.ownerNumber}`
+            `SenderBase: ${senderBase}`,
+            `OwnerJid: ${ownerJid}`,
+            `OwnerBase: ${ownerBase}`,
+            `OwnerNumber: ${opts.ownerNumber}`,
+            `IsOwner: ${isOwner}`
           ]);
           
-          if (sender !== opts.ownerNumber) {
+          if (!isOwner) {
             continue;
           }
 

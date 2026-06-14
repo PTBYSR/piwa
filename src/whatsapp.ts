@@ -17,6 +17,7 @@ import NodeCache from "node-cache";
 import pino from "pino";
 import * as fs from "fs";
 import * as path from "path";
+import * as util from "util";
 
 // ---- SILENCE LIBSIGNAL NOISE ----
 // Baileys' underlying crypto library (libsignal) aggressively spams console.log/error
@@ -27,13 +28,21 @@ const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
 
 function isIgnoredNoise(args: any[]): boolean {
-  const str = args.map(a => String(a?.stack || a?.message || a)).join(" ");
+  const str = args.map(a => {
+    if (typeof a === "object" && a !== null) {
+      return util.inspect(a, { depth: null });
+    }
+    return String(a?.stack || a?.message || a);
+  }).join(" ");
   return (
     str.includes("Failed to decrypt message") ||
     str.includes("Session error:") ||
+    str.includes("Session error") ||
     str.includes("Bad MAC") ||
     str.includes("Closing open session") ||
     str.includes("Closing session:") ||
+    str.includes("Closing session") ||
+    str.includes("SessionEntry") ||
     str.includes("SessionEntry {")
   );
 }

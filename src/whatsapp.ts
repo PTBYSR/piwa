@@ -115,6 +115,7 @@ export async function createWhatsAppBridge(
   let globalSock: WASocket | null = null;
   let typingTimers = new Map<string, ReturnType<typeof setInterval>>();
   let ownerJid: string | null = null; // Resolved JID (could be LID or phone@s.whatsapp.net)
+  let bridgeObject: WhatsAppBridge | null = null;
 
   return new Promise((resolveBridge, rejectBridge) => {
     let isResolved = false;
@@ -226,7 +227,7 @@ export async function createWhatsAppBridge(
               
               isResolved = true;
               
-              const bridgeObject: WhatsAppBridge = {
+              bridgeObject = {
                 sendMessage: async (jid: string, text: string) => {
                   if (globalSock) await globalSock.sendMessage(jid, { text });
                 },
@@ -257,9 +258,6 @@ export async function createWhatsAppBridge(
                   } catch {}
                 },
               };
-
-              // Make bridge available to messages.upsert below
-              (globalSock as any).bridgeObject = bridgeObject;
 
               resolveBridge(bridgeObject);
             } catch (err) {
@@ -379,9 +377,8 @@ export async function createWhatsAppBridge(
             if (msg.key) await sock.readMessages([msg.key]);
           } catch {}
 
-          const bridgeObj = (globalSock as any)?.bridgeObject;
-          if (isResolved && bridgeObj) {
-            opts.onMessage(text, jid, pushName, bridgeObj);
+          if (isResolved && bridgeObject) {
+            opts.onMessage(text, jid, pushName, bridgeObject);
           }
         }
       });

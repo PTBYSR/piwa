@@ -151,6 +151,19 @@ export async function createWhatsAppBridge(
       rejectBridge(err);
     }
 
+    let reconnectAttempt = 0;
+    const MAX_RECONNECT_DELAY = 60_000; // cap at 60 seconds
+
+    function getReconnectDelay(): number {
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttempt), MAX_RECONNECT_DELAY);
+      reconnectAttempt++;
+      return delay;
+    }
+
+    function resetReconnectBackoff() {
+      reconnectAttempt = 0;
+    }
+
     async function start(): Promise<void> {
       const { state, saveCreds } = await useMultiFileAuthState(opts.authDir);
 
@@ -235,6 +248,7 @@ export async function createWhatsAppBridge(
               ownerJid = ownerCheck.jid;
               console.log(`✅ Owner verified! (JID: ${ownerJid})`);
               console.log("✅ Connected to WhatsApp!\n");
+              resetReconnectBackoff();
               
               // Send a confirmation message to the owner
               try {
@@ -312,12 +326,14 @@ export async function createWhatsAppBridge(
             // 515 is DisconnectReason.restartRequired
             // 428 is DisconnectReason.connectionClosed
             // These are normal signals from WhatsApp during the pairing handshake!
-            console.log(`\n🔄 WhatsApp requested a stream restart (Normal during pairing, code ${statusCode}). Reconnecting...`);
-            start().catch(() => {});
+            console.log(`\n🔄 WhatsApp requested a stream restart (code ${statusCode}). Reconnecting...`);
+            const delay = getReconnectDelay();
+            setTimeout(() => start().catch(() => {}), delay);
           } else {
             if (isResolved) {
-              console.log("\n♻️ Reconnecting to WhatsApp...");
-              start().catch(() => {});
+              const delay = getReconnectDelay();
+              console.log(`\n♻️ Reconnecting to WhatsApp in ${Math.round(delay / 1000)}s...`);
+              setTimeout(() => start().catch(() => {}), delay);
             } else {
               // FATAL IF DURING SETUP (e.g. 408 Timeout, 500 Server Error)
               console.error(`\n❌ ERROR: WhatsApp connection dropped during setup. Code: ${statusCode}`);

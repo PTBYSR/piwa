@@ -26,6 +26,7 @@ import * as util from "util";
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 const originalConsoleWarn = console.warn;
+const originalConsoleInfo = console.info;
 
 function isIgnoredNoise(args: any[]): boolean {
   const str = args.map(a => {
@@ -36,14 +37,18 @@ function isIgnoredNoise(args: any[]): boolean {
   }).join(" ");
   return (
     str.includes("Failed to decrypt message") ||
-    str.includes("Session error:") ||
     str.includes("Session error") ||
     str.includes("Bad MAC") ||
     str.includes("Closing open session") ||
-    str.includes("Closing session:") ||
     str.includes("Closing session") ||
+    str.includes("Opening session") ||
+    str.includes("Session already closed") ||
+    str.includes("Session already open") ||
+    str.includes("Decrypted message with closed session") ||
+    str.includes("Removing old closed session") ||
+    str.includes("Migrating session to") ||
     str.includes("SessionEntry") ||
-    str.includes("SessionEntry {")
+    str.includes("session storage migration error")
   );
 }
 
@@ -66,6 +71,10 @@ console.error = function (...args) {
 console.warn = function (...args) {
   if (isIgnoredNoise(args)) return appendToDebugLog("WARN", args);
   originalConsoleWarn.apply(console, args);
+};
+console.info = function (...args) {
+  if (isIgnoredNoise(args)) return appendToDebugLog("INFO", args);
+  originalConsoleInfo.apply(console, args);
 };
 // ----------------------------------
 

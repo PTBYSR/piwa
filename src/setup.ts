@@ -120,7 +120,7 @@ export async function ensureAIProvider(authStorage: any): Promise<void> {
     const key = await text({
       message: `Enter your API key for ${provider}:`,
       validate(value) {
-        if (!value.trim()) return "API key cannot be empty.";
+        if (!value || typeof value !== "string" || !value.trim()) return "API key cannot be empty.";
       }
     });
 

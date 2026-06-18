@@ -122,7 +122,17 @@ async function main() {
     // 2. If no default is set, pick the very first model the user has an API key for
     if (!model) {
       const allModels = modelRegistry.getAll();
-      model = allModels.length > 0 ? allModels[0] : getModel("google", "gemini-2.5-flash");
+      const authList = authStorage.list();
+
+      if (authList.includes("google-antigravity")) {
+        model = allModels.find(m => m.provider === "google-antigravity");
+      } else if (authList.includes("google-gemini-cli")) {
+        model = allModels.find(m => m.provider === "google-gemini-cli");
+      }
+
+      if (!model) {
+        model = allModels.length > 0 ? allModels[0] : getModel("google", "gemini-2.5-flash");
+      }
     }
 
     if (!model) {
@@ -169,6 +179,12 @@ async function main() {
   let waBridge: WhatsAppBridge | null = null;
   let waProcessing: Promise<unknown> = Promise.resolve();
 
+  let firstMessageReceived = false;
+  let firstMessageResolve: () => void = () => {};
+  const firstMessagePromise = new Promise<void>((resolve) => {
+    firstMessageResolve = resolve;
+  });
+
   while (!waBridge) {
     const config = await loadOrPromptConfig();
 
@@ -181,6 +197,11 @@ async function main() {
         ownerNumber: config.ownerNumber,
         onMessage: (text, jid, pushName, bridge) => {
           if (!bridge) return;
+          
+          if (!firstMessageReceived) {
+            firstMessageReceived = true;
+            firstMessageResolve();
+          }
           
           waProcessing = waProcessing.then(async () => {
             bridge.startTyping(jid);
@@ -215,8 +236,9 @@ async function main() {
                   
                 await bridge.sendMessage(jid, authHelpMsg).catch(() => {});
               } else {
+                const cleanError = err?.message || "Unknown error occurred.";
                 await bridge
-                  .sendMessage(jid, "⚠️ agent error, check terminal")
+                  .sendMessage(jid, `⚠️ *Agent Error:*\n${cleanError}`)
                   .catch(() => {});
               }
             } finally {
@@ -248,7 +270,21 @@ async function main() {
   });
 
   // ---- Take over the screen with the TUI ----
-  console.log("🚀 Booting up Pi Terminal UI...");
+  console.log("\nPlease send a message to the bot on WhatsApp to start the terminal UI.");
+  
+  // Animated dots logic
+  let dots = 0;
+  const spinnerInterval = setInterval(() => {
+    process.stdout.write(`\r⏳ Waiting for first message${".".repeat(dots)}${" ".repeat(3 - dots)}`);
+    dots = (dots + 1) % 4;
+  }, 500);
+
+  await firstMessagePromise;
+  clearInterval(spinnerInterval);
+  
+  // Clear the screen completely so the terminal UI renders perfectly without stray output
+  console.clear();
+
   await interactiveMode.run();
 }
 

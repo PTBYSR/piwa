@@ -93,6 +93,11 @@ async function runTurn(
       if (a.type === "text_delta") buffer += a.delta;
     }
 
+    // Forward internal agent errors (e.g. quota/API limits) to WhatsApp
+    if (event.type === "auto_retry_end" && !event.success && event.finalError) {
+      buffer += `\n\n⚠️ *Agent Error:*\n${event.finalError}`;
+    }
+
     if (!flushing && Date.now() - lastFlush > FLUSH_MS && buffer.trim()) {
       flushing = flush().finally(() => {
         flushing = null;

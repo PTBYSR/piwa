@@ -171,7 +171,9 @@ export async function createWhatsAppBridge(
       try {
         const info = await fetchLatestBaileysVersion();
         version = info.version;
-        if (!isResolved) console.log(`📦 Using WA Web version: ${version.join(".")}`);
+        if (!isResolved) {
+          // Silent version log
+        }
       } catch {
         version = [2, 3000, 1015901307];
       }
@@ -209,11 +211,16 @@ export async function createWhatsAppBridge(
           pairingCodeRequested = true;
           setTimeout(async () => {
             try {
-              console.log(`\n📞 Requesting pairing code for ${opts.agentNumber}...`);
+              console.clear();
+              console.log(`⏳ Initializing WhatsApp connection...\n`);
+              console.log(`📞 Requesting pairing code for the BOT's WhatsApp number (${opts.agentNumber})...`);
               const code = await sock.requestPairingCode(opts.agentNumber);
-              console.log(`\n📢 YOUR PAIRING CODE: \x1b[32m${code}\x1b[0m`);
-              console.log(`👉 Enter this code on the WhatsApp account for ${opts.agentNumber}`);
-              console.log(`⏳ Waiting for you to link...`);
+              console.log(`\n📢 YOUR BOT'S WHATSAPP NUMBER PAIRING CODE: \x1b[32m${code}\x1b[0m`);
+              console.log(`👉 Open the BOT's WhatsApp.`);
+              console.log(`👉 Tap the three dots (⋮) -> Linked Devices -> Link a Device.`);
+              console.log(`👉 Tap 'Link with phone number instead' at the bottom.`);
+              console.log(`👉 Insert the above PAIRING CODE`);
+              console.log(`⏳ Note: Sometimes linking takes a moment to load, please wait patiently after entering the code.`);
             } catch (err: any) {
               const msg = err?.message?.toLowerCase() || "";
               if (msg.includes("400") || msg.includes("not-authorized")) {
@@ -231,29 +238,24 @@ export async function createWhatsAppBridge(
         // 2. SUCCESSFULLY CONNECTED
         if (connection === "open") {
           if (!isResolved) {
-            console.log("\n🔍 Verifying Owner number...");
-            
             try {
               const res = await sock.onWhatsApp(opts.ownerNumber);
               const ownerCheck = res?.[0];
               
               if (!ownerCheck || !ownerCheck.exists) {
-                console.error(`\n❌ ERROR: The Owner number (${opts.ownerNumber}) is NOT registered on WhatsApp!`);
-                console.error(`The bot cannot be controlled by a non-existent number.`);
                 cleanupAndReject(new Error("BAD_OWNER_NUMBER"));
                 return;
               }
               
               // Store the resolved JID (may be a LID like 279...@lid or phone@s.whatsapp.net)
               ownerJid = ownerCheck.jid;
-              console.log(`✅ Owner verified! (JID: ${ownerJid})`);
               console.log("✅ Connected to WhatsApp!\n");
               resetReconnectBackoff();
               
               // Send a confirmation message to the owner
               try {
                 await sock.sendMessage(ownerJid, {
-                  text: "✅ *Piwa is online!*\n\nYour coding agent is connected and ready. Send me a message or a command to get started.\n\nType */help* for available commands."
+                  text: "✅ *Hello I'm Piwa*\n\nYou can now interact with the piwa coding agent on your laptop here on Whatsapp.\n\nSend a \"Hi\" to me...\n\nType */help* for available commands."
                 });
               } catch {}
               
@@ -326,7 +328,7 @@ export async function createWhatsAppBridge(
             // 515 is DisconnectReason.restartRequired
             // 428 is DisconnectReason.connectionClosed
             // These are normal signals from WhatsApp during the pairing handshake!
-            console.log(`\n🔄 WhatsApp requested a stream restart (code ${statusCode}). Reconnecting...`);
+            console.log(`\n🔄 Connecting to WhatsApp...`);
             const delay = getReconnectDelay();
             setTimeout(() => start().catch(() => {}), delay);
           } else {

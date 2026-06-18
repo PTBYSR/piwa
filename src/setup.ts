@@ -144,10 +144,27 @@ export async function loadOrPromptConfig(): Promise<PiwaConfig> {
   }
 
   console.clear();
+  
+  const piwaLogo = `
+ ________  ___  ___       __   ________     
+|\\   __  \\|\\  \\|\\  \\     |\\  \\|\\   __  \\    
+\\ \\  \\|\\  \\ \\  \\ \\  \\    \\ \\  \\ \\  \\|\\  \\   
+ \\ \\   ____\\ \\  \\ \\  \\  __\\ \\  \\ \\   __  \\  
+  \\ \\  \\___|\\ \\  \\ \\  \\|\\__\\_\\  \\ \\  \\ \\  \\ 
+   \\ \\__\\    \\ \\__\\ \\____________\\ \\__\\ \\__\\
+    \\|__|     \\|__|\\|____________|\\|__|\\|__|
+  `;
+  
+  console.log(color.cyan(piwaLogo));
+  console.log(color.white("Piwa acts as a bridge between your computers terminal and your WhatsApp account,"));
+  console.log(color.white("allowing you to interact with your coding agent straight from your phone.\n"));
+  console.log(color.gray("Please follow through this quick onboarding process to get set up."));
+  console.log(color.gray("Author: PTBYSR ( Paul-Simon Emechebe )\n"));
+
   intro(color.bgCyan(color.black(" Piwa (Pi WhatsApp Agent) Setup ")));
 
   const agentNumber = await text({
-    message: "What is the BOT's WhatsApp number? (Must be an active, regular personal account; NOT a WhatsApp Business account)",
+    message: "What is the BOT's WhatsApp number? (This should be a separate, dedicated WhatsApp account that you will scan the pairing code with, NOT your personal number. Must be a regular account, not Business.)",
     placeholder: "e.g. 2347066499537",
     validate(value) {
       if (!value) return color.red("Please enter a valid number.");

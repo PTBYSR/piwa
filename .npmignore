@@ -1,0 +1,22 @@
+# Ignore desktop development directory
+piwa-desktop/
+
+# Ignore media/images
+*.png
+*.ico
+*.gif
+
+# Ignore local configuration and logs
+piwa.config.json
+piwa-baileys.log
+.piwa-auth/
+
+# Ignore test scripts
+src/test-send.ts
+
+# Ignore git/editor configs
+.github/
+.vscode/
+.claude/
+.gitignore
+.gitattributes
